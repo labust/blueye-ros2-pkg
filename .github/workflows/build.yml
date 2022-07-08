@@ -1,0 +1,29 @@
+name: Build base image
+
+on:
+  push:
+    branches: [ feature/docker-autorun ]
+    tags: [ 'v*.*.*' ]
+
+jobs:    
+  build-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+     
+    - name: Prepare context
+      run: cp docker/* .
+        
+    - name: Build roadmap image
+      uses: labust/docker-build-stage@v0.1
+      with:   
+        tag-name: ghcr.io/labust/blueye-manual-control
+        context: .
+        username: ${{ secrets.RODOCKERACCESSUSER }}
+        password: ${{ secrets.RODOCKERACCESSPAT }} 
