@@ -33,7 +33,7 @@ def generate_launch_description():
             namespace='blueye',
             name='gstreamer_node_topside',
             package='gscam',
-            executable='gscam_main',
+            executable='gscam_node',
             output='screen',
             emulate_tty=True,
             parameters= [gstreamer_node_params],
