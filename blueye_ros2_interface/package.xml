@@ -3,9 +3,9 @@
 <package format="3">
   <name>blueye_ros2_interface</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="nadir.kapetanovic@fer.hr">nadir</maintainer>
-  <license>TODO: License declaration</license>
+  <description>ROS2 interface for the Blueye Pioneer ROV.</description>
+  <maintainer email="matko.batos@fer.unizg.hr">Matko Batos</maintainer>
+  <license>Apache-2.0</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
@@ -19,13 +19,9 @@
   <exec_depend>geometry_msgs</exec_depend>
   
   <build_depend>builtin_interfaces</build_depend>
-<build_depend>rosidl_default_generators</build_depend>
-<exec_depend>builtin_interfaces</exec_depend>
-<exec_depend>rosidl_default_runtime</exec_depend>
-<build_depend>message_generation</build_depend> 
-<exec_depend>message_runtime</exec_depend> 
-
-<member_of_group>rosidl_interface_packages</member_of_group>
+  <build_depend>rosidl_default_generators</build_depend>
+  <exec_depend>builtin_interfaces</exec_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
  
 
   <export>

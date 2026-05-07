@@ -18,14 +18,16 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='nadir',
-    maintainer_email='nadir.kapetanovic@fer.hr',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='Matko Batos',
+    maintainer_email='matko.batos@fer.unizg.hr',
+    description='ROS2 interface for the Blueye Pioneer ROV.',
+    license='Apache-2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'blueye_interface = blueye_ros2_interface.blueye_interface:main'
+            'blueye_interface  = blueye_ros2_interface.blueye_interface:main',
+            'blueye_telemetry  = blueye_ros2_interface.blueye_telemetry:main',
+            'rov_data_logger   = blueye_ros2_interface.rov_data_logger:main',
         ],
     },
 )
