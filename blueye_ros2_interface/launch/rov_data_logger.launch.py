@@ -9,7 +9,7 @@ def generate_launch_description():
 
     log_dir_arg = DeclareLaunchArgument(
         'log_dir',
-        default_value=os.path.expanduser('~/rov_logs'),
+        default_value=os.path.expanduser('~/ros2_ws/rov_logs'),
         description='Directory where CSV log files are written',
     )
     log_rate_arg = DeclareLaunchArgument(

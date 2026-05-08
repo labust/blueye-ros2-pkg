@@ -8,7 +8,6 @@ def generate_launch_description():
 
     pkg = get_package_share_directory('blueye_ros2_interface')
 
-    # Blueye telemetry node
     telemetry_node = Node(
         namespace='blueye',
         name='blueye_telemetry',
@@ -19,7 +18,6 @@ def generate_launch_description():
         parameters=[os.path.join(pkg, 'config', 'blueye_telemetry_params.yaml')],
     )
 
-    # Data logger node
     logger_node = Node(
         name='rov_data_logger',
         package='blueye_ros2_interface',
@@ -28,11 +26,24 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[os.path.join(pkg, 'config', 'rov_data_logger_params.yaml')],
         remappings=[
-            ('depth',             '/blueye/depth'),
-            ('imu',               '/blueye/imu'),
-            ('battery_state',     '/blueye/battery_state'),
-            ('altitude',          '/blueye/altitude'),
-            ('water_temperature', '/blueye/water_temperature'),
+            ('depth',                          '/blueye/depth'),
+            ('imu_calibrated',                 '/blueye/imu_calibrated'),
+            ('imu1',                           '/blueye/imu1'),
+            ('imu2',                           '/blueye/imu2'),
+            ('attitude',                       '/blueye/attitude'),
+            ('battery_state',                  '/blueye/battery_state'),
+            ('water_temperature',              '/blueye/water_temperature'),
+            ('canister_humidity',              '/blueye/canister_humidity'),
+            ('canister_temperature',           '/blueye/canister_temperature'),
+            ('control_force',                  '/blueye/control_force'),
+            ('control_mode',                   '/blueye/control_mode'),
+            ('controller_depth_error',         '/blueye/controller_depth_error'),
+            ('controller_depth_health',        '/blueye/controller_depth_health'),
+            ('controller_heading_error',       '/blueye/controller_heading_error'),
+            ('controller_heading_health',      '/blueye/controller_heading_health'),
+            ('magnetic_declination',           '/blueye/magnetic_declination'),
+            ('cpu_temperature',                '/blueye/cpu_temperature'),
+            ('dive_time',                      '/blueye/dive_time'),
         ],
     )
 

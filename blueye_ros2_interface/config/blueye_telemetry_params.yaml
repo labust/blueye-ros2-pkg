@@ -2,10 +2,8 @@ blueye:
   blueye_telemetry:
     ros__parameters:
 
-      # IP address of the Blueye ROV.
-      # Leave empty ('') to let the Blueye SDK auto-discover the drone
-      # 192.168.1.101 
-      drone_ip: ''
+      # IP address of the Blueye ROV (192.168.1.101)
+      drone_ip: '192.168.1.101'
 
       rate: 10.0
 

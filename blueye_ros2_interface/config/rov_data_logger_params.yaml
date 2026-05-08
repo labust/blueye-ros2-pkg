@@ -8,17 +8,26 @@ rov_data_logger:
     log_rate: 1.0
 
     # Blueye sensors 
-    log_blueye_depth:        true
-    log_blueye_imu:          true
-    log_blueye_battery:      true
-    log_blueye_altitude:     true    
-    log_blueye_water_temp:   true    
+    log_blueye_depth:               true
+    log_blueye_imu_calibrated:      true   
+    log_blueye_imu1:                true   
+    log_blueye_imu2:                true   
+    log_blueye_attitude:            true   
+    log_blueye_battery:             true
+    log_blueye_water_temp:          true
+    log_blueye_canister:            true   
+    log_blueye_control_force:       true
+    log_blueye_control_mode:        true
+    log_blueye_controller_health:   true
+    log_blueye_magnetic_declination: true
+    log_blueye_cpu_temp:            true
+    log_blueye_dive_time:           true
 
-    # External GNSS + heading 
-    log_gnss_fix:            false  
-    log_heading:             false   
+    # External GNSS + heading   
+    log_gnss_fix:                   false
+    log_heading:                    false
 
-    # WaterLinked UWGPS 
-    log_uwgps_relative:      false  
-    log_uwgps_ned:           false
-    log_uwgps_global:        false
+    # WaterLinked UWGPS   
+    log_uwgps_relative:             false
+    log_uwgps_ned:                  false
+    log_uwgps_global:               false
