@@ -4,8 +4,11 @@ rov_data_logger:
     # Directory for output CSV files
     log_dir:  ~/ros2_ws/rov_logs
 
-    # How often to write a row [Hz]
+    # Full log rate [Hz] - all topics
     log_rate: 1.0
+
+    # Nav log rate [Hz] - depth, IMUs, attitude, UWGPS
+    nav_log_rate: 10.0
 
     # Blueye sensors 
     log_blueye_depth:               true
@@ -28,6 +31,6 @@ rov_data_logger:
     log_heading:                    false
 
     # WaterLinked UWGPS   
-    log_uwgps_relative:             false
-    log_uwgps_ned:                  false
-    log_uwgps_global:               false
+    log_uwgps_relative:             true
+    log_uwgps_ned:                  true
+    log_uwgps_global:               true

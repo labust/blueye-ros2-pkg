@@ -20,7 +20,7 @@ def generate_launch_description():
     )
     launch_uwgps = DeclareLaunchArgument(
         'launch_uwgps',
-        default_value='false',
+        default_value='true',
         description='Launch the WaterLinked UWGPS G2 ROS bridge node',
     )
 
