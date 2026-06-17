@@ -26,11 +26,13 @@ rov_data_logger:
     log_blueye_cpu_temp:            true
     log_blueye_dive_time:           true
 
-    # External GNSS + heading   
-    log_gnss_fix:                   true
-    log_heading:                    true
+    # Topside dual GNSS antennas + heading used by WaterLinked node
+    log_gnss_left:                  true
+    log_gnss_right:                 true
+    log_gnss_heading:               true
 
-    # WaterLinked UWGPS   
+    # WaterLinked UWGPS
     log_uwgps_relative:             true
     log_uwgps_ned:                  true
     log_uwgps_global:               true
+    log_uwgps_diagnostics:          true

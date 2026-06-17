@@ -19,6 +19,7 @@ from std_msgs.msg import Float64, String
 from sensor_msgs.msg import NavSatFix, Imu, BatteryState, Temperature
 from geometry_msgs.msg import WrenchStamped, Vector3Stamped
 from geographic_msgs.msg import GeoPointStamped
+from diagnostic_msgs.msg import DiagnosticArray
 
 
 _NAN = float('nan')
@@ -36,6 +37,9 @@ _NAV_HEADER = [
     'uwgps_rel_x_m', 'uwgps_rel_y_m', 'uwgps_rel_z_m',
     'uwgps_ned_n_m', 'uwgps_ned_e_m', 'uwgps_ned_d_m',
     'uwgps_lat_deg', 'uwgps_lon_deg', 'uwgps_alt_m',
+    'gnss_left_lat_deg', 'gnss_left_lon_deg', 'gnss_left_alt_m',
+    'gnss_right_lat_deg', 'gnss_right_lon_deg', 'gnss_right_alt_m',
+    'gnss_heading_deg',
 ]
 
 _FULL_HEADER = [
@@ -58,11 +62,14 @@ _FULL_HEADER = [
     'magnetic_declination_deg',
     'cpu_temp_c',
     'dive_time_s',
-    'fix_lat_deg', 'fix_lon_deg', 'fix_alt_m',
-    'heading_deg',
+    'gnss_left_lat_deg', 'gnss_left_lon_deg', 'gnss_left_alt_m',
+    'gnss_right_lat_deg', 'gnss_right_lon_deg', 'gnss_right_alt_m',
+    'gnss_heading_deg',
     'uwgps_rel_x_m', 'uwgps_rel_y_m', 'uwgps_rel_z_m',
     'uwgps_ned_n_m', 'uwgps_ned_e_m', 'uwgps_ned_d_m',
     'uwgps_lat_deg', 'uwgps_lon_deg', 'uwgps_alt_m',
+    'diag_position_valid', 'diag_receiver_distance', 'diag_receiver_nsd',
+    'diag_receiver_rssi', 'diag_receiver_valid', 'diag_std',
 ]
 
 
@@ -92,11 +99,13 @@ class RovDataLogger(Node):
         self.declare_parameter('log_blueye_cpu_temp',        True)
         self.declare_parameter('log_blueye_dive_time',       True)
         # External / optional
-        self.declare_parameter('log_gnss_fix',       False)
-        self.declare_parameter('log_heading',        False)
-        self.declare_parameter('log_uwgps_relative', False)
-        self.declare_parameter('log_uwgps_ned',      False)
-        self.declare_parameter('log_uwgps_global',   False)
+        self.declare_parameter('log_gnss_left',         False)
+        self.declare_parameter('log_gnss_right',        False)
+        self.declare_parameter('log_gnss_heading',      False)
+        self.declare_parameter('log_uwgps_relative',    False)
+        self.declare_parameter('log_uwgps_ned',         False)
+        self.declare_parameter('log_uwgps_global',      False)
+        self.declare_parameter('log_uwgps_diagnostics', False)
 
         log_dir      = self.get_parameter('log_dir').value
         log_rate     = self.get_parameter('log_rate').value
@@ -116,11 +125,13 @@ class RovDataLogger(Node):
         self._en_mag_decl    = self.get_parameter('log_blueye_magnetic_declination').value
         self._en_cpu_temp    = self.get_parameter('log_blueye_cpu_temp').value
         self._en_dive_time   = self.get_parameter('log_blueye_dive_time').value
-        self._en_fix         = self.get_parameter('log_gnss_fix').value
-        self._en_heading     = self.get_parameter('log_heading').value
+        self._en_gnss_left    = self.get_parameter('log_gnss_left').value
+        self._en_gnss_right   = self.get_parameter('log_gnss_right').value
+        self._en_gnss_heading = self.get_parameter('log_gnss_heading').value
         self._en_rel         = self.get_parameter('log_uwgps_relative').value
         self._en_ned         = self.get_parameter('log_uwgps_ned').value
         self._en_global      = self.get_parameter('log_uwgps_global').value
+        self._en_diag        = self.get_parameter('log_uwgps_diagnostics').value
 
         os.makedirs(os.path.expanduser(log_dir), exist_ok=True)
         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -158,11 +169,13 @@ class RovDataLogger(Node):
         self._mag_decl    = None
         self._cpu_temp    = None
         self._dive_time   = None
-        self._fix         = None
-        self._heading     = None
+        self._gnss_left    = None
+        self._gnss_right   = None
+        self._gnss_heading = None
         self._rel         = None
         self._ned         = None
         self._geo         = None
+        self._diag        = None
 
         if self._en_depth:
             self.create_subscription(Float64,      'depth',                         self._depth_cb,      10)
@@ -196,16 +209,20 @@ class RovDataLogger(Node):
             self.create_subscription(Temperature,  'cpu_temperature',               self._cpu_temp_cb,   10)
         if self._en_dive_time:
             self.create_subscription(Float64,      'dive_time',                     self._dive_time_cb,  10)
-        if self._en_fix:
-            self.create_subscription(NavSatFix,    'fix',                           self._fix_cb,        10)
-        if self._en_heading:
-            self.create_subscription(Float64,      'heading_deg',                   self._heading_cb,    10)
+        if self._en_gnss_left:
+            self.create_subscription(NavSatFix, 'gnss_left_fix',  self._gnss_left_cb,    10)
+        if self._en_gnss_right:
+            self.create_subscription(NavSatFix, 'gnss_right_fix', self._gnss_right_cb,   10)
+        if self._en_gnss_heading:
+            self.create_subscription(Float64,   'gnss_heading',   self._gnss_heading_cb, 10)
         if self._en_rel:
             self.create_subscription(Vector3Stamped,'locator_position_relative_wrt_topside', self._rel_cb, 10)
         if self._en_ned:
             self.create_subscription(Vector3Stamped,'locator_position_topside_ned', self._ned_cb,        10)
         if self._en_global:
             self.create_subscription(GeoPointStamped,'locator_position_global',     self._geo_cb,        10)
+        if self._en_diag:
+            self.create_subscription(DiagnosticArray,'locator_position_acoustic_diagnostics', self._diag_cb, 10)
 
         self._nav_timer  = self.create_timer(1.0 / nav_log_rate, self._write_nav_row)
         self._full_timer = self.create_timer(1.0 / log_rate,     self._write_full_row)
@@ -227,11 +244,13 @@ class RovDataLogger(Node):
         if self._en_mag_decl:    enabled.append('magnetic_declination')
         if self._en_cpu_temp:    enabled.append('cpu_temperature')
         if self._en_dive_time:   enabled.append('dive_time')
-        if self._en_fix:         enabled.append('fix')
-        if self._en_heading:     enabled.append('heading_deg')
+        if self._en_gnss_left:    enabled.append('/gnss_left/fix')
+        if self._en_gnss_right:   enabled.append('/gnss_right/fix')
+        if self._en_gnss_heading: enabled.append('/gnss_heading')
         if self._en_rel:         enabled.append('uwgps_relative')
         if self._en_ned:         enabled.append('uwgps_ned')
         if self._en_global:      enabled.append('uwgps_global')
+        if self._en_diag:        enabled.append('uwgps_diagnostics')
         self.get_logger().info('Subscribed topics: ' + ', '.join(enabled))
 
 
@@ -253,11 +272,15 @@ class RovDataLogger(Node):
     def _mag_decl_cb(self, msg):     self._mag_decl   = msg.data
     def _cpu_temp_cb(self, msg):     self._cpu_temp   = msg.temperature
     def _dive_time_cb(self, msg):    self._dive_time  = msg.data
-    def _fix_cb(self, msg):          self._fix        = msg
-    def _heading_cb(self, msg):      self._heading    = msg.data
+    def _gnss_left_cb(self, msg):    self._gnss_left    = msg
+    def _gnss_right_cb(self, msg):   self._gnss_right   = msg
+    def _gnss_heading_cb(self, msg): self._gnss_heading = msg.data
     def _rel_cb(self, msg):          self._rel        = msg
     def _ned_cb(self, msg):          self._ned        = msg
     def _geo_cb(self, msg):          self._geo        = msg
+    def _diag_cb(self, msg):
+        if msg.status:
+            self._diag = {kv.key: kv.value for kv in msg.status[0].values}
 
 
     @staticmethod
@@ -306,6 +329,18 @@ class RovDataLogger(Node):
             glon = self._geo.position.longitude
             galt = self._geo.position.altitude
 
+        gl_lat = gl_lon = gl_alt = _NAN
+        if self._gnss_left:
+            gl_lat = self._gnss_left.latitude
+            gl_lon = self._gnss_left.longitude
+            gl_alt = self._gnss_left.altitude if not math.isnan(self._gnss_left.altitude) else _NAN
+        gr_lat = gr_lon = gr_alt = _NAN
+        if self._gnss_right:
+            gr_lat = self._gnss_right.latitude
+            gr_lon = self._gnss_right.longitude
+            gr_alt = self._gnss_right.altitude if not math.isnan(self._gnss_right.altitude) else _NAN
+        gnss_heading = self._gnss_heading if self._gnss_heading is not None else _NAN
+
         return (now, depth,
                 gx, gy, gz, ax, ay, az,
                 i1gx, i1gy, i1gz, i1ax, i1ay, i1az,
@@ -313,7 +348,10 @@ class RovDataLogger(Node):
                 att_r, att_p, att_y,
                 rx, ry, rz,
                 nn, ne, nd,
-                glat, glon, galt)
+                glat, glon, galt,
+                gl_lat, gl_lon, gl_alt,
+                gr_lat, gr_lon, gr_alt,
+                gnss_heading)
 
     # ---- row writers -------------------------------------------------------
 
@@ -350,13 +388,6 @@ class RovDataLogger(Node):
         cpu_temp  = self._cpu_temp  if self._cpu_temp  is not None else _NAN
         dive_time = self._dive_time if self._dive_time is not None else _NAN
 
-        fix_lat = fix_lon = fix_alt = _NAN
-        if self._fix:
-            fix_lat = self._fix.latitude
-            fix_lon = self._fix.longitude
-            fix_alt = self._fix.altitude if not math.isnan(self._fix.altitude) else _NAN
-        heading = self._heading if self._heading is not None else _NAN
-
         # nav columns come first (excluding timestamp which is nav[0])
         (now, depth,
          gx, gy, gz, ax, ay, az,
@@ -365,7 +396,19 @@ class RovDataLogger(Node):
          att_r, att_p, att_y,
          rx, ry, rz,
          nn, ne, nd,
-         glat, glon, galt) = nav
+         glat, glon, galt,
+         gl_lat, gl_lon, gl_alt,
+         gr_lat, gr_lon, gr_alt,
+         gnss_heading) = nav
+
+        diag_pos_valid = diag_dist = diag_nsd = diag_rssi = diag_valid = diag_std = _NAN
+        if self._diag:
+            diag_pos_valid = self._diag.get('position_valid', _NAN)
+            diag_dist      = self._diag.get('receiver_distance', _NAN)
+            diag_nsd       = self._diag.get('receiver_nsd', _NAN)
+            diag_rssi      = self._diag.get('receiver_rssi', _NAN)
+            diag_valid     = self._diag.get('receiver_valid', _NAN)
+            diag_std       = self._diag.get('std', _NAN)
 
         self._full_writer.writerow([
             now,
@@ -385,11 +428,13 @@ class RovDataLogger(Node):
             mag_decl,
             cpu_temp,
             dive_time,
-            fix_lat, fix_lon, fix_alt,
-            heading,
+            gl_lat, gl_lon, gl_alt,
+            gr_lat, gr_lon, gr_alt,
+            gnss_heading,
             rx, ry, rz,
             nn, ne, nd,
             glat, glon, galt,
+            diag_pos_valid, diag_dist, diag_nsd, diag_rssi, diag_valid, diag_std,
         ])
         self._full_file.flush()
 

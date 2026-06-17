@@ -51,7 +51,7 @@ def generate_launch_description():
             ('locator_position_relative_wrt_topside',  'locator_position_relative_wrt_topside'),
             ('locator_position_global',                'locator_position_global'),
             ('locator_position_topside_ned',           'locator_position_topside_ned'),
-            ('locator_acoustic_diagnostics',           'locator_acoustic_diagnostics'),
+            ('locator_position_acoustic_diagnostics',   'locator_position_acoustic_diagnostics'),
         ],
         condition=IfCondition(LaunchConfiguration('launch_uwgps')),
     )
@@ -84,10 +84,15 @@ def generate_launch_description():
             ('magnetic_declination',           '/blueye/magnetic_declination'),
             ('cpu_temperature',                '/blueye/cpu_temperature'),
             ('dive_time',                      '/blueye/dive_time'),
+            # Topside GNSS + heading
+            ('gnss_left_fix',   '/gnss_left/fix'),
+            ('gnss_right_fix',  '/gnss_right/fix'),
+            ('gnss_heading',    '/gnss_heading'),
             # WaterLinked UWGPS topics
-            ('locator_position_relative_wrt_topside', '/uwgps/locator_position_relative_wrt_topside'),
-            ('locator_position_topside_ned',          '/uwgps/locator_position_topside_ned'),
+            ('locator_position_relative_wrt_topside',  '/uwgps/locator_position_relative_wrt_topside'),
+            ('locator_position_topside_ned',           '/uwgps/locator_position_topside_ned'),
             ('locator_position_global',               '/uwgps/locator_position_global'),
+            ('locator_position_acoustic_diagnostics', '/uwgps/locator_position_acoustic_diagnostics'),
         ],
     )
 
