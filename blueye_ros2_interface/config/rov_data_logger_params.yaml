@@ -27,8 +27,8 @@ rov_data_logger:
     log_blueye_dive_time:           true
 
     # External GNSS + heading   
-    log_gnss_fix:                   false
-    log_heading:                    false
+    log_gnss_fix:                   true
+    log_heading:                    true
 
     # WaterLinked UWGPS   
     log_uwgps_relative:             true

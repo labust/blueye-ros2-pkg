@@ -36,18 +36,22 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('launch_blueye')),
     )
 
-    # WaterLinked UWGPS bridge node 
+    # WaterLinked UWGPS G2 localization node
     uwgps_node = Node(
         namespace='uwgps',
-        name='uwgpsg2_ros_bridge',
+        name='waterlinked_localization_node',
         package='uwgpsg2_ros2_interface',
-        executable='uwgpsg2_ros_bridge',
+        executable='uwgpsg2_ros2_interface',
         output='screen',
         emulate_tty=True,
-        parameters=[os.path.join(uwgps_pkg, 'config', 'uwgps_ros_bridge_params.yaml')],
+        parameters=[os.path.join(uwgps_pkg, 'config', 'waterlinked_node_params.yaml')],
         remappings=[
-            ('fix',         '/fix'),
-            ('heading_deg', '/heading_deg'),
+            ('fix',                                    'fix'),
+            ('navrelposned',                           'navrelposned'),
+            ('locator_position_relative_wrt_topside',  'locator_position_relative_wrt_topside'),
+            ('locator_position_global',                'locator_position_global'),
+            ('locator_position_topside_ned',           'locator_position_topside_ned'),
+            ('locator_acoustic_diagnostics',           'locator_acoustic_diagnostics'),
         ],
         condition=IfCondition(LaunchConfiguration('launch_uwgps')),
     )
