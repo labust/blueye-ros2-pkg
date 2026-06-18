@@ -14,6 +14,7 @@ from datetime import datetime
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import Float64, String
 from sensor_msgs.msg import NavSatFix, Imu, BatteryState, Temperature
@@ -214,7 +215,9 @@ class RovDataLogger(Node):
         if self._en_gnss_right:
             self.create_subscription(NavSatFix, 'gnss_right_fix', self._gnss_right_cb,   10)
         if self._en_gnss_heading:
-            self.create_subscription(Float64,   'gnss_heading',   self._gnss_heading_cb, 10)
+            _best_effort_qos = QoSProfile(depth=10)
+            _best_effort_qos.reliability = ReliabilityPolicy.BEST_EFFORT
+            self.create_subscription(Float64, 'gnss_heading', self._gnss_heading_cb, _best_effort_qos)
         if self._en_rel:
             self.create_subscription(Vector3Stamped,'locator_position_relative_wrt_topside', self._rel_cb, 10)
         if self._en_ned:
