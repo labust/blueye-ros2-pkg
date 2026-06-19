@@ -26,7 +26,7 @@ from diagnostic_msgs.msg import DiagnosticArray
 _NAN = float('nan')
 
 _NAV_HEADER = [
-    'timestamp_utc',
+    'timestamp_local',
     'depth_m',
     'cal_gyro_x_rads', 'cal_gyro_y_rads', 'cal_gyro_z_rads',
     'cal_accel_x_ms2', 'cal_accel_y_ms2', 'cal_accel_z_ms2',
@@ -44,7 +44,7 @@ _NAV_HEADER = [
 ]
 
 _FULL_HEADER = [
-    'timestamp_utc',
+    'timestamp_local',
     'depth_m',
     'cal_gyro_x_rads', 'cal_gyro_y_rads', 'cal_gyro_z_rads',
     'cal_accel_x_ms2', 'cal_accel_y_ms2', 'cal_accel_z_ms2',
@@ -306,7 +306,7 @@ class RovDataLogger(Node):
 
     def _nav_values(self):
         """Return (now, nav columns...) shared by both writers."""
-        now = datetime.utcnow().isoformat(timespec='milliseconds')
+        now = datetime.now().isoformat(timespec='milliseconds')
 
         depth = self._depth if self._depth is not None else _NAN
 
